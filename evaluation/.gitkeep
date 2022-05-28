@@ -1,0 +1,11 @@
+﻿data/input/
+data/target/
+data/train/
+data/val/
+__pycache__
+.idea
+results
+disc.pth.tar
+gen.pth.tar
+data/input/
+results/results_anime.png

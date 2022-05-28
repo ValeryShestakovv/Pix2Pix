@@ -1,0 +1,7 @@
+﻿data/input/
+data/target/
+data/train/
+data/val/
+__pycache__
+.idea
+
