@@ -1,5 +1,5 @@
 import torch
-from generator_model import Generator
+from generator_model_norm_output import Generator_Norm_Out
 import config
 import coremltools as ct
 import coremltools.proto.FeatureTypes_pb2 as ft
@@ -14,42 +14,34 @@ def save_model_quantization():
     print("end")
 
 def convert_to_coreml():
-    # В PyTorch обычной практикой является подготовка данных перед передачей их в сеть, поэтому сеть не содержит
-    # уровня нормализации. Но в CoreML и Vision такой функциональности нет. Вы должны либо самостоятельно подготовить
-    # массив пикселей из UIImage и передать его непосредственно в CoreML (без использования Vision framework),
-    # либо добавить уровень нормализации в свою сеть.
-    # поскольку модель работает со значениями в диапазоне (-1, 1), а UIImage изображения в swift хранятся
-    # в (0, 256), то необходимо нормализовать входные и выходные данные для модели coreml. С помощью
-    # coremltools мы можем, почему-то, изменить только входные данные(реализация на 31-36 строках), но не можем
-    # изменить выходные. Поэтому подгружаем измененную генеративную модель, отличие которой лишь в том, что
-    # в послежнем слое нормализуем до (0, 256)
-    model = Generator(in_channels=3, features=64).to(config.DEVICE)
-    # вытаскивает из чекпоинта стейты генеративной модели
+    #Подгружаем нормализованную генеративную модель
+    model = Generator_Norm_Out(in_channels=3, features=64).to(config.DEVICE)
+    #Подгружаем веса обученной модели
     checkpoint = torch.load(config.CHECKPOINT_GEN, map_location=config.DEVICE)
     model.load_state_dict(checkpoint["state_dict"])
-    # создаем рандомный импут нужной размерности для трассировки модели
+    #Cоздаем массив нужной размерности для трассировки модели
     example_input = torch.randn((1, 3, 256, 256))
+    #Переводим модель в состояние оценки
     model.eval()
+    #Создаем трассированную модель
     traced_model = torch.jit.trace(model, example_input)
 
-    #При помощи ImageType изменяем входные данные для модели
+    #При помощи ImageType нормализуем входные данные для модели
     scale = 1/(0.5*255.0)
     bias = [- 0.5 / 0.5, - 0.5 / 0.5, - 0.5 / 0.5]
-
     image_input = ct.ImageType(name="input_1",
                                shape=example_input.shape,
                                scale=scale, bias=bias)
-
-    #конвертируем модель
+    #Конвертируем модель в формат Core ML
     model = ct.convert(
         traced_model,
         inputs=[image_input],
     )
-
+    #Сохраняем сконвертированную модель
     model.save("model_coreml.mlmodel")
-    #Указываем, что выходной слой выдает изображение размером 256 на 256
+    
+    #Указываем, что выходной слой выдает изображение размером 256 на 256 пикселей
     spec = ct.utils.load_spec("model_coreml.mlmodel")
-
     output = spec.description.output[0]
     output.type.imageType.colorSpace = ft.ImageFeatureType.RGB
     output.type.imageType.height = 256
