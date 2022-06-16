@@ -1,10 +1,10 @@
 # Pix2Pix
-Реализация модели Pix2Pix полностью соотвествует пейперу:https://arxiv.org/abs/1611.07004
+Реализация модели Pix2Pix полностью соотвествует статье:https://arxiv.org/abs/1611.07004
 
 
 ## Results
-||
-|:------- ![](results/results_comics.jpg) ](results/results_comics.jpg) |
+
+![](results/results_comics.jpg) 
 
 
 ### Dataset
