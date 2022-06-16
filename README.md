@@ -4,8 +4,7 @@
 
 ## Results
 ||
-|:---:|
-|![](results/results_anime.png)|
+|:------- ![](results/results_comics.jpg) ](results/results_comics.jpg) |
 
 
 ### Dataset

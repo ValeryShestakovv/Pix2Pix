@@ -59,17 +59,17 @@ def train_fn(
 def main():
     disc = Discriminator(in_channels=3).to(config.DEVICE)
     gen = Generator(in_channels=3, features=64).to(config.DEVICE)
-    opt_disc = optim.Adam(disc.parameters(), lr=config.DISC_LEARNING_RATE, betas=(0.5, 0.999),)
-    opt_gen = optim.Adam(gen.parameters(), lr=config.GAN_LEARNING_RATE, betas=(0.5, 0.999))
+    opt_disc = optim.Adam(disc.parameters(), lr=config.LEARNING_RATE, betas=(0.5, 0.999),)
+    opt_gen = optim.Adam(gen.parameters(), lr=config.LEARNING_RATE, betas=(0.5, 0.999))
     BCE = nn.BCEWithLogitsLoss()
     L1_LOSS = nn.L1Loss()
 
     if config.LOAD_MODEL:
         load_checkpoint(
-            config.CHECKPOINT_GEN, gen, opt_gen, config.GAN_LEARNING_RATE,
+            config.CHECKPOINT_GEN, gen, opt_gen, config.LEARNING_RATE,
         )
         load_checkpoint(
-            config.CHECKPOINT_DISC, disc, opt_disc, config.DISC_LEARNING_RATE,
+            config.CHECKPOINT_DISC, disc, opt_disc, config.LEARNING_RATE,
         )
 
     train_dataset = MapDataset(root_dir=config.TRAIN_DIR)
